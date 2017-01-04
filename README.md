@@ -1,4 +1,4 @@
-Mopidy
+Mopidy ES6
 ======
 
 Mopidy library targeting ES2015 with no dependencies.

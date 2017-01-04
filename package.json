@@ -1,7 +1,9 @@
 {
   "name": "mopidy-es6",
-  "version": "0.0.1",
-  "main": "index.js",
+  "version": "0.0.2",
+  "description": "ES6 lib for controlling a Mopidy music server over a WebSocket",
+  "main": "lib/mopidy.js",
+  "typings": "lib/mopidy.d.ts",
   "license": "MIT",
   "dependencies": {}
 }

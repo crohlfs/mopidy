@@ -109,6 +109,8 @@ declare namespace Mopidy {
 }
 
 declare class Mopidy {
+	constructor(url: string);
+
     /**
     * Close the WebSocket without reconnecting.
     * Letting the object be garbage collected will have the same effect, so this isn't strictly necessary.
@@ -804,6 +806,6 @@ declare class Mopidy {
 	}
 }
 
-declare module 'mopidy' {
+declare module 'mopidy-es6' {
     export default Mopidy;
 }
