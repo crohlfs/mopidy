@@ -1,5 +1,5 @@
 {
-  "name": "mopidy",
+  "name": "mopidy-es6",
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
