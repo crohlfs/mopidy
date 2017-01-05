@@ -16,7 +16,7 @@ export default class MopidyClient {
 
       this.call('core.describe')
         .then((api: ApiDescription) => {
-          Object.assign(this, createApiObject(api, this.call));
+          Object.assign(this, createApiObject(api, (method, params) => this.call(method, params)));
           this.emit('state:online');
         });
     };

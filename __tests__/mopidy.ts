@@ -13,8 +13,6 @@ test('api is assigned correctly', () => {
 
   var apiObject = createApiObject(api, (method: string, params?: any) => params ? { method, params} : { method });
 
-  console.info(apiObject);
-
   expect(apiObject.playback.pause()).toEqual({ method: 'core.playback.pause' });
   expect(apiObject.playback.seek(55)).toEqual({ method: 'playback.seek', params: { time: 55} });
   expect(apiObject.fooBar()).toEqual({ method: 'foo_bar' });
