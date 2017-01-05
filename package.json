@@ -4,6 +4,32 @@
   "description": "ES6 lib for controlling a Mopidy music server over a WebSocket",
   "main": "lib/mopidy.js",
   "typings": "lib/mopidy.d.ts",
-  "license": "MIT",
-  "dependencies": {}
+  "license": "Apache-2.0",
+  "repository": {
+    "url": "https://github.com/crohlfs/mopidy.git",
+    "type": "git"
+  },
+  "author": "Chris Rohlfs <chrisrohlfs@outlook.com>",
+  "dependencies": {},
+  "scripts": {
+    "build": "tsc",
+    "test": "ts-jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^16.0.3",
+    "jest": "^18.1.0",
+    "ts-jest": "^18.0.1",
+    "typescript": "^2.1.4"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  }
 }

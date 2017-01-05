@@ -1,3 +1,9 @@
+interface MopidyOptions {
+  url: string,
+  reconnectInterval: number,
+  socketCreator: (url: string) => WebSocket
+}
+
 export default class MopidyClient {
   socket: WebSocket;
   pendingRequests = new Map<number, {resolve: (value?: any) => void, reject: (reason?: any) => void}>();
@@ -8,15 +14,15 @@ export default class MopidyClient {
     this.createSocket(url, 5000);
   }
 
-  private createSocket(url: string, reconnectTimeout: number) {
+  private createSocket(url: string, reconnectInterval: number) {
     this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
       this.emit('socket:connect');
 
       this.call('core.describe')
-        .then(methods => {
-          this.attachApi(methods);
+        .then((api: ApiDescription) => {
+          Object.assign(this, createApiObject(api, this.call));
           this.emit('state:online');
         });
     };
@@ -45,7 +51,7 @@ export default class MopidyClient {
 
     this.socket.onerror = error => this.emit('socket:error', error);
 
-    this.socket.onclose = () => setTimeout(() => this.createSocket(url, reconnectTimeout), reconnectTimeout);
+    this.socket.onclose = () => setTimeout(() => this.createSocket(url, reconnectInterval), reconnectInterval);
   }
   
   private getNextId(): number {
@@ -62,7 +68,7 @@ export default class MopidyClient {
       var id = this.getNextId();
 
       this.pendingRequests.set(id, {resolve, reject});
-      this.sendRequest({ jsonrpc: '2.0', method, id, params });
+      this.sendRequest(params ? { jsonrpc: '2.0', method, id, params } : { jsonrpc: '2.0', method, id });
     });
   }
 
@@ -108,43 +114,6 @@ export default class MopidyClient {
     this.pendingRequests.forEach(f => f.reject('Socket has been closed'));
     this.pendingRequests.clear();
   }
-
-  private attachApi(api: any) {
-    var getPath = (fullName: string) => {
-      var path = fullName.split(".");
-      
-      if (path.length >= 1 && path[0] === "core") {
-        path = path.slice(1);
-      }
-
-      return path;
-    };
-
-    var initaliseObjectPath = (objPath: string[]) => {
-      var parent = this as any;
-
-      for (var objName of objPath) {
-        objName = snakeToCamel(objName);
-        
-        parent[objName] = parent[objName] || {};
-        parent = parent[objName];
-      }
-
-      return parent;
-    };
-
-    var createMethod = (fullMethodName: string) => {
-      var methodPath = getPath(fullMethodName);
-      var methodName = snakeToCamel(methodPath.slice(-1)[0]);
-      
-      var objectPathEnd = initaliseObjectPath(methodPath.slice(0, -1));
-      
-      objectPathEnd[methodName] = (params?: any) => () => this.call(methodName, params);
-    };
-
-    Object.keys(api).forEach(createMethod);
-    this.emit("state:online");
-  }
 }
 
 interface JsonRpcRequest {
@@ -175,3 +144,78 @@ function isRpcEvent(arg: any): arg is JsonRpcEvent {
 }
 
 var snakeToCamel = (name: string) => name.replace(/(_[a-z])/g, match => match.toUpperCase().replace("_", ""));
+
+type ApiDescription = {[fullMethodName: string]: MethodDescription};
+
+interface MethodDescription {
+  description: string,
+  params: (ParameterDescription | KwargsParameterDescription)[]
+}
+
+interface ParameterDescription {
+  default: any,
+  name: string
+}
+
+function isKwargsArgument(arg: any): arg is KwargsParameterDescription {
+  return arg.kwargs === true;
+}
+
+interface KwargsParameterDescription {
+  kwargs: true
+}
+
+export var createApiObject = (api: ApiDescription, call: (method: string, params?: any) => any): any => {
+  var root = {};
+
+  var getPath = (fullName: string) => {
+    var path = fullName.split(".");
+    
+    if (path.length >= 1 && path[0] === "core") {
+      path = path.slice(1);
+    }
+
+    return path;
+  };
+
+  var initaliseObjectPath = (objPath: string[]) => {
+    var parent = root as any;
+
+    for (var objName of objPath) {
+      objName = snakeToCamel(objName);
+      
+      parent[objName] = parent[objName] || {};
+      parent = parent[objName];
+    }
+
+    return parent;
+  };
+
+  for (let fullMethodName of Object.keys(api)) {
+    let method = api[fullMethodName];
+
+    let methodPath = getPath(fullMethodName);
+    let methodName = snakeToCamel(methodPath.slice(-1)[0]);
+    
+    let objectPathEnd = initaliseObjectPath(methodPath.slice(0, -1));
+    
+    if (method.params && method.params.length > 0) {
+      objectPathEnd[methodName] = (...args: any[]) => {
+        var params = {} as any;
+
+        var i = 0;
+        for (var param of method.params) {
+          if (!isKwargsArgument(param)) {
+            params[param.name] = args[i]; 
+          }
+        }
+
+        return call(fullMethodName, params);
+      }
+    } else {
+      objectPathEnd[methodName] = () => call(fullMethodName);
+    }
+  }
+
+  return root;
+};

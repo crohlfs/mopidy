@@ -3,7 +3,7 @@ Mopidy ES6
 
 Mopidy library targeting ES2015 with no dependencies.
 
-The library was made for better integration of Typescript typings, and I had some issues with the official library dependencies from React Native.
+The library was made as I had some conflicts with the dependencies of mopidy.js, which this library is heavily based off of.
 
 ## Installation
 
