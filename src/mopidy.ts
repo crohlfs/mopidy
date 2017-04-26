@@ -200,7 +200,7 @@ export var createApiObject = (api: ApiDescription, call: (method: string, params
         var i = 0;
         for (var param of method.params) {
           if (!isKwargsArgument(param)) {
-            params[param.name] = args[i]; 
+            params[param.name] = args[i++]; 
           }
         }
 
