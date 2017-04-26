@@ -12,7 +12,7 @@ The library was made as I had some conflicts with the dependencies of mopidy.js,
 ## Using the library
 
 ```js
-import Mopidy from 'mopidy';
+import Mopidy from 'mopidy-es6';
 
 var mopidy = new Mopidy('ws://localhost:6680/mopidy/ws/');
 ```
