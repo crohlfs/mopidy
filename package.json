@@ -13,13 +13,14 @@
   "dependencies": {},
   "scripts": {
     "build": "tsc",
-    "test": "ts-jest"
+    "test": "node ./node_modules/jest/bin/jest.js",
+    "test-watch": "node ./node_modules/jest/bin/jest.js --watch"
   },
   "devDependencies": {
-    "@types/jest": "^16.0.3",
-    "jest": "^18.1.0",
-    "ts-jest": "^18.0.1",
-    "typescript": "^2.1.4"
+    "@types/jest": "^19.2.2",
+    "jest": "^19.0.2",
+    "ts-jest": "^19.0.11",
+    "typescript": "^2.2.2"
   },
   "jest": {
     "transform": {
